@@ -1,88 +1,42 @@
-# APRS Track Direct
+# NYUAD's APRS server front-end implementation
 
-APRS Track Direct is a collection of tools that can be used to run an APRS website. You can use data from APRS-IS, CWOP-IS, OGN or any other source that uses the APRS specification.
 
-Tools included are an APRS data collector, a websocket server, a javascript library (websocket client and more) and a website example (which can of course be used as is).
+This is based on TrackDirect, but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network.
 
-## What is APRS?
-APRS (Automatic Packet Reporting System) is a digital communications system that uses packet radio to send real time tactical information. The APRS network is used by ham radio operators all over the world.
+## How does it work?
 
-Information shared over the APRS network is for example coordinates, altitude, speed, heading, text messages, alerts, announcements, bulletins and weather data.
+Most of the work is done with Python scripts, and are working from the included *trackdirect* **module**.
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes (but they are of course also valid for you who want to set up a public website).
-
-Please note that the instructions is not intended to be something that you can follow exactly without any adaptions. See the instructions as initial tips on how the tools can be used, and read the code to get a deeper understanding.
-
-Further down you will find some information how to install trackdirect with Docker and Docker Compose.
+The core core traffic is being accessed by instances of the data **collector** script, and the incoming packets are processed. These scripts upload the processed packets to an sql **database**. The system's web server fetches the required data from the database using **php** scripts, and it gets displayed in the browser using a bunch of javascript libraries.
 
 ### Prerequisites
 
-What things you need to install and how to install them. These instructions are for Ubuntu 20.04
+What things you need to install and how to install them. The server is running Ubuntu 22.04, so you may need to adapt them
 
 Install some ubuntu packages
 ```
-sudo apt update
-sudo apt-get install libpq-dev postgresql-12 postgresql-client-common postgresql-client libevent-dev apache2 php libapache2-mod-php php-dom php-pgsql libmagickwand-dev imagemagick php-imagick inkscape php-gd libjpeg-dev python3 python3-dev python3-pip python-is-python3
+sudo apt-get update
+sudo apt-get install libpq-dev postgresql postgresql-client-common postgresql-client libevent-dev apache2 php libapache2-mod-php php-dom php-pgsql libmagickwand-dev imagemagick php-imagick inkscape php-gd libjpeg-dev python3 python3-dev python3-pip python-is-python3
 ```
 
-### Set up aprsc
-You should not to connect your collector and websocket server directly to a public APRS server (APRS-IS, CWOP-IS or OGN server). The collector will use a full feed connection and each websocket client will use a filtered feed connection (through the websocket server). To not cause extra load on public servers it is better to run your own aprsc server and let your collector and all websocket connections connect to that instead (will result in only one full feed connection to a public APRS server).
+### Back-end connection
 
-Note that it seems like aprsc needs to run on a server with a public ip, otherwise uplink won't work.
+As the collector scripts are syphoning out each and every packet ever being trasnmitted, this is going to be a considerable load on someone's server. NYUAD has its own aprs server set up, so we will connect to this one:
 
-#### Installation
-Follow the instructions found [here](http://he.fi/aprsc/INSTALLING.html).
+* APRS: [http://aprs.abudhabi.nyu.edu:14501](http://aprs.abudhabi.nyu.edu:14501)
+* CWOP: [http://aprs.abudhabi.nyu.edu:14502](http://aprs.abudhabi.nyu.edu:14502)
 
-#### Config file
-You must modify the configuration file before starting aprsc.
-```
-sudo vi /opt/aprsc/etc/aprsc.conf
-```
+You should connect to these servers from within NYUAD's internal network
 
-Uplink examples:
-```
-# Uplink "APRS-IS" ro tcp rotate.aprs.net 10152
-# Uplink "CWOP" ro tcp cwop.aprs.net 10152
-# Uplink "OGN" ro tcp aprs.glidernet.org 10152
-```
-Only use one of them, if you are going to use multiple sources you should set up muliple aprsc servers and run multiple collectors. That will enable you to have different settings for different sources.
+### Installation
 
-#### Start aprsc server
-Start aprsc
+After cloning, you'll need to do some manual copying, because nothing is in a package.
+
+But fitst, install the needed python libraries
 ```
-sudo systemctl start aprsc
+pip3 install -r requirements.txt
 ```
 
-If you run multiple aprsc instances you need to select different data och log directories (and of course different tcp ports in configuration file). Running multiple aprsc instances is only needed if you fetch data from multiple sources (like both APRS-IS and CWOP-IS).
-
-Should be possible to start multiple aprsc instances by using something like this:
-```
-sudo /opt/aprsc/sbin/aprsc -u aprsc -t /opt/aprsc -c /etc/aprsc.conf -r /logs -o file -f
-sudo /opt/aprsc/sbin/aprsc -u aprsc -t /opt/aprsc2 -c /etc/aprsc2.conf -r /logs2 -o file -f
-```
-
-### Installing Track Direct
-
-Note: TrackDirect have to be installed in the user home directory, it can't be in any subdirectory.
-
-
-Start by cloning the repository
-```
-git clone https://github.com/qvarforth/trackdirect
-cd trackdirect
-```
-
-Before installing all python requirements it is likly that you need to upgrade pyOpenSSL.
-```
-sudo python -m easy_install --upgrade pyOpenSSL
-```
-
-Install needed python libs
-```
-pip install -r requirements.txt
-```
 
 #### Set up database
 
