@@ -1,0 +1,1 @@
+These shell scripts need to be adapted for handling absolute paths.
