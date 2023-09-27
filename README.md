@@ -1,7 +1,6 @@
 # NYUAD's APRS server front-end implementation
 
-
-This is based on TrackDirect, but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network.
+This is based on TrackDirect, but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network. I am writing this documentation as I am going through the code, so there will undoubtedly be some factual errors. I will correct them as I go.
 
 ## How does it work?
 
@@ -9,11 +8,18 @@ Most of the work is done with Python scripts, and are working from the included 
 
 The core core traffic is being accessed by instances of the data **collector** script, and the incoming packets are processed. These scripts upload the processed packets to an sql **database**. The system's web server fetches the required data from the database using **php** scripts, and it gets displayed in the browser using a bunch of javascript libraries.
 
+#### Ports used
+
+* 80 for the website :)
+* 14580 for APRS
+* 5432 for the database access (local to the machine)
+* 9000 for websocket comms (local to the machine)
+
 ### Prerequisites
 
 What things you need to install and how to install them. The server is running Ubuntu 22.04, so you may need to adapt them
 
-Install some ubuntu packages
+Install some required ubuntu packages
 ```
 sudo apt-get update
 sudo apt-get install libpq-dev postgresql postgresql-client-common postgresql-client libevent-dev apache2 php libapache2-mod-php php-dom php-pgsql libmagickwand-dev imagemagick php-imagick inkscape php-gd libjpeg-dev python3 python3-dev python3-pip python-is-python3
@@ -26,7 +32,7 @@ As the collector scripts are syphoning out each and every packet ever being tras
 * APRS: [http://aprs.abudhabi.nyu.edu:14501](http://aprs.abudhabi.nyu.edu:14501)
 * CWOP: [http://aprs.abudhabi.nyu.edu:14502](http://aprs.abudhabi.nyu.edu:14502)
 
-You should connect to these servers from within NYUAD's internal network
+You should connect to these servers from within NYUAD's internal network.
 
 ### Installation
 
@@ -34,13 +40,15 @@ After cloning, you'll need to do some manual copying, because nothing is in a pa
 
 But fitst, install the needed python libraries
 ```
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 
-#### Set up database
+#### Database
 
-Set up the database (connect to database using: "sudo -u postgres psql"). You need to replace "my_username".  Note that APRS using UTF-8 encoding so it may be necessary to specify as shown.
+Set up the database (connect to database using: "sudo -u postgres psql"). You need to replace "my_username". This can be anything as it's only for the database access.
+
+Note that APRS using UTF-8 encoding so it may be necessary to specify as shown.
 ```
 CREATE DATABASE trackdirect ENCODING 'UTF8';
 
@@ -49,12 +57,11 @@ ALTER ROLE my_username WITH SUPERUSER;
 GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to my_username;
 ```
 
-Might be good to add password to password-file:
+Save the password to this file as well, some scripts rely on it:
 ```
-vi ~/.pgpass
+echo "foobar" > ~./pgpass
 ```
 
-##### Increase database performance
 It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss).
 
 Some settings in /etc/postgresql/12/main/postgresql.conf that might improve performance:
@@ -75,25 +82,25 @@ The script should be executed by the user that owns the database "trackdirect".
 ~/trackdirect/server/scripts/db_setup.sh trackdirect 5432 ~/trackdirect/misc/database/tables/
 ```
 
-#### Set up OGN device data
-If you are using data from OGN (Open Glider Network) it is IMPORTANT to keep the OGN data updated (the database table ogn_devices). This is important since otherwise you might show airplanes that you are not allowed to show. I recommend that you run this script at least once every hour (or more often). The script should be executed by the user that you granted access to the database "trackdirect".
-```
-~/trackdirect/server/scripts/ogn_devices_install.sh trackdirect 5432
-```
-
 #### Configure trackdirect
 Before starting the websocket server you need to update the trackdirect configuration file (trackdirect/config/trackdirect.ini). Read through the configuration file and make any necessary changes.
 ```
-vi ~/trackdirect/config/trackdirect.ini
+nano ~/trackdirect/config/trackdirect.ini
 ```
 
 #### Start the collectors
-Before starting the collector you need to update the trackdirect configuration file (trackdirect/config/trackdirect.ini).
+
+Do not start the collector script until the .ini file is set up properly: `trackdirect/config/trackdirect.ini`.
 
 Start the collector by using the provided shell-script. Note that if you have configured multiple collectors (fetching from multiple aprs servers, for example both APRS-IS and CWOP-IS) you need to call the shell-script multiple times. The script should be executed by the user that you granted access to the database "trackdirect".
+
 ```
 ~/trackdirect/server/scripts/collector.sh trackdirect.ini 0
+
+~/trackdirect/server/scripts/collector.sh trackdirect.ini 1
 ```
+
+The third argument is the collector number: in `trackdirect.ini`, you need to set up `[collector0]` and `[collector1]` for this to work.
 
 #### Start the websocket server
 When the user interacts with the map we want it to be populated with objects from the backend. To achive good performance we avoid using background HTTP requests (also called AJAX requests), instead we use websocket communication. The included trackdirect js library (trackdirect.min.js) will connect to our websocket server and request objects for the current map view.
