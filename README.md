@@ -110,10 +110,6 @@ Start the websocket server by using the provided shell script, the script should
 ~/trackdirect/server/scripts/wsserver.sh trackdirect.ini
 ```
 
-If you have enabled a firewall, make sure the selected port is open (we are using port 9000 by default, can be changed in trackdirect.ini).
-```
-sudo ufw allow 9000
-```
 
 #### Trackdirect js library
 All the map view magic is handled by the trackdirect js library, it contains functionality for rendering the map (using Google Maps API or Leaflet), functionality used to communicate with backend websocket server and much more.
