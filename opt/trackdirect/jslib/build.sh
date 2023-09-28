@@ -1,13 +1,13 @@
 #!/bin/bash
 CURRENTDIR=$(dirname $0)
 
-cd $CURRENTDIR/../htdocs
+#cd $CURRENTDIR/../htdocs
 mkdir -p tmp
 
 #
 # Minimize and move to build dir
 #
-for file in $(find ../jslib/src/ -name '*.js')
+for file in $(find src/ -name '*.js')
 do
     if [[ ${file} != *".min."* ]];then
         newFile="${file##*/}"
@@ -25,10 +25,10 @@ done
 #
 # Create the full js file
 #
-cp tmp/trackdirect.min.js public/js/trackdirect.min.js
+cp tmp/trackdirect.min.js /var/www%html/public/js/trackdirect.min.js
 rm tmp/trackdirect.min.js
 # Note that the order is important (may need to start adding digits in beginning of each js-file)
-ls -vr tmp/*.js | xargs cat  >> public/js/trackdirect.min.js
+ls -vr tmp/*.js | xargs cat  >> /var/www/html/public/js/trackdirect.min.js
 
 #
 # Remove temp dir

@@ -33,7 +33,11 @@ sudo apt-get install libpq-dev postgresql postgresql-client-common postgresql-cl
 
 ### Map tile API key
 
-For low-volume applications, OpenStreetMap's tile servers MAY be OK, but you should get alternative solutions. You may want to run your own tile server, or get an API key from a different service.
+For low-volume applications, OpenStreetMap's tile servers MAY be OK, but you should get alternative solutions. You may want to run your own tile server, or get an API key from a different service. If you make any changes to this, then
+
+```shell
+sudo -u www-data /opt/trackdirect/jslib/build.sh
+```
 
 ### Connection to the packet network
 
