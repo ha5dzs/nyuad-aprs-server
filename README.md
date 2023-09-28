@@ -22,7 +22,7 @@ If some IT department is setting up the firewall, tell them that they need to en
 
 ### Prerequisites
 
-My server is running Ubuntu 22.04, so you may need to adapt this
+My server is running Ubuntu 22.04, so you may need to adapt this.
 
 Install some required ubuntu packages
 
@@ -30,6 +30,10 @@ Install some required ubuntu packages
 sudo apt-get update
 sudo apt-get install libpq-dev postgresql postgresql-client-common postgresql-client libevent-dev apache2 php libapache2-mod-php php-dom php-pgsql libmagickwand-dev imagemagick php-imagick inkscape php-gd libjpeg-dev python3 python3-dev python3-pip python-is-python3
 ```
+
+### Map tile API key
+
+For low-volume applications, OpenStreetMap's tile servers MAY be OK, but you should get alternative solutions. You may want to run your own tile server, or get an API key from a different service.
 
 ### Connection to the packet network
 
