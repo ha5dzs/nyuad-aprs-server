@@ -56,17 +56,27 @@ pip install -r requirements.txt
 
 #### Database
 
-Set up the database (connect to database using: "sudo -u postgres psql"). You need to replace "my_username". This can be anything as it's only for the database access.
-
+Set up the database (connect to database using: "sudo -u postgres psql"). If you choose to replace "database_user" and "database_password", then update `trackdirect.ini` as well.
 Note that APRS using UTF-8 encoding so it may be necessary to specify as shown.
+
+```shell
+sudo -u postgres psql
+```
 
 ```sql
 CREATE DATABASE trackdirect ENCODING 'UTF8';
 
-CREATE USER my_username WITH PASSWORD 'foobar';
-ALTER ROLE my_username WITH SUPERUSER;
-GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to my_username;
+CREATE USER database_user WITH PASSWORD database_password;
+ALTER ROLE database_user WITH SUPERUSER;
+GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to database_user;
 ```
+
+**A note on security:** Normally, for any exposed environment, publishing any superuser details is something extremely idiotic. But in this case:
+
+* The sql system is not used by anything else, and the port is not accessible outside
+* It doesn't store any sensitive information, only sorted packets, which are unencrypted and publicly available anyway
+* Since the database is filled through the python script, the PHP script only makes queries.
+* Old data is getting purged regularly
 
 Save the password to this file as well, some scripts rely on it:
 
@@ -74,9 +84,9 @@ Save the password to this file as well, some scripts rely on it:
 echo "foobar" > .pgpass
 ```
 
-It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss).
+It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss). For Ubuntu 22.04, posgresql version 14 is bundled, your system might be different.
 
-Some settings in /etc/postgresql/12/main/postgresql.conf that might improve performance:
+Some settings in /etc/postgresql/14/main/postgresql.conf that might improve performance:
 
 ```ini
 shared_buffers = 2048MB              # I recommend 25% of total RAM
@@ -174,8 +184,8 @@ sudo systemctl restart apache2
 For the symbols and heatmap caches to work we need to make sure the webserver has write access (the following permission may be a little bit too generous...)
 
 ```shell
-chmod 777 /var/www/trackdirect/htdocs/public/symbols
-chmod 777 /var/www/trackdirect/htdocs/public/heatmaps
+chmod 777 /var/www/html//public/symbols
+chmod 777 /var/www/html/public/heatmaps
 ```
 
 ## Deployment
