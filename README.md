@@ -128,7 +128,7 @@ Start the collector by using the provided shell-script. Note that if you have co
 /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 1
 ```
 
-The third argument is the collector number: in `trackdirect.ini`, you need to set up `[collector0]` and `[collector1]` for this to work.
+The third argument is the collector number: in `trackdirect.ini`, you need to set up `[collector0]` and `[collector1]` for this to work. **Change the callsign and passcode accordingly!**
 
 #### Start the websocket server
 
