@@ -25,7 +25,7 @@ done
 #
 # Create the full js file
 #
-cp tmp/trackdirect.min.js /var/www%html/public/js/trackdirect.min.js
+cp tmp/trackdirect.min.js /var/www/html/public/js/trackdirect.min.js
 rm tmp/trackdirect.min.js
 # Note that the order is important (may need to start adding digits in beginning of each js-file)
 ls -vr tmp/*.js | xargs cat  >> /var/www/html/public/js/trackdirect.min.js
