@@ -50,25 +50,6 @@ But first, install the needed python libraries
 pip install -r requirements.txt
 ```
 
-Example locations to copy, straight after cloning:
-
-This moves the website to the document root of the webserver, and enables write permissions for the heatmaps.
-```shell
-cp nyuad-aprs-server/web_document_root/* /var/www
-chown -R www-data.www-data /var/www
-chmod -R 777 /var/www/public/symbols
-chmod -R 777 /var/www/public/heatmaps
-```
-
-This moves the entire code base to /opt/nyuad-aprs-server
-```shell
-cp nyuad-aprs-server /opt
-chown -R www-data.www-data /opt/nyuad-aprs-server
-```
-
-
-
-
 #### Database
 
 Set up the database (connect to database using: "sudo -u postgres psql"). You need to replace "my_username". This can be anything as it's only for the database access.
@@ -86,7 +67,7 @@ GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to my_username;
 Save the password to this file as well, some scripts rely on it:
 
 ```shell
-echo "foobar" > ~./pgpass
+echo "foobar" > .pgpass
 ```
 
 It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss).
@@ -102,7 +83,7 @@ commit_delay=100000                  # Will result in a 0.1s commit delay
 Restart postgresql
 
 ```shell
-sudo /etc/init.d/postgresql restart
+sudo systemctl restart postgresql
 ```
 
 ##### Set up database tables
@@ -110,7 +91,7 @@ sudo /etc/init.d/postgresql restart
 The script should be executed by the user that owns the database "trackdirect".
 
 ```shell
-~/trackdirect/server/scripts/db_setup.sh trackdirect 5432 ~/trackdirect/misc/database/tables/
+/opt/trackdirect/server/scripts/db_setup.sh trackdirect 5432 /opt/trackdirect/misc/database/tables/
 ```
 
 #### Configure trackdirect
@@ -118,19 +99,19 @@ The script should be executed by the user that owns the database "trackdirect".
 Before starting the websocket server you need to update the trackdirect configuration file (trackdirect/config/trackdirect.ini). Read through the configuration file and make any necessary changes.
 
 ```shell
-nano ~/trackdirect/config/trackdirect.ini
+nano /opt/trackdirect/config/trackdirect.ini
 ```
 
 #### Start the collectors
 
-Do not start the collector script until the .ini file is set up properly: `trackdirect/config/trackdirect.ini`.
+**Do not start the collector script until the .ini file is set up properly!**
 
 Start the collector by using the provided shell-script. Note that if you have configured multiple collectors (fetching from multiple aprs servers, for example both APRS-IS and CWOP-IS) you need to call the shell-script multiple times. The script should be executed by the user that you granted access to the database "trackdirect".
 
 ```shell
-~/trackdirect/server/scripts/collector.sh trackdirect.ini 0
+/opt/trackdirect/server/scripts/collector.sh trackdirect.ini 0
 
-~/trackdirect/server/scripts/collector.sh trackdirect.ini 1
+/opt/trackdirect/server/scripts/collector.sh trackdirect.ini 1
 ```
 
 The third argument is the collector number: in `trackdirect.ini`, you need to set up `[collector0]` and `[collector1]` for this to work.
@@ -142,7 +123,7 @@ When the user interacts with the map we want it to be populated with objects fro
 Start the websocket server by using the provided shell script, the script should be executed by the user that you granted access to the database "trackdirect".
 
 ```shell
-~/trackdirect/server/scripts/wsserver.sh trackdirect.ini
+/opt/trackdirect/server/scripts/wsserver.sh trackdirect.ini
 ```
 
 
@@ -153,7 +134,7 @@ All the map view magic is handled by the trackdirect js library, it contains fun
 If you do changes in the js library (jslib directory) you need to execute build.sh to deploy the changes to the htdocs directory.
 
 ```shell
-~/trackdirect/jslib/build.sh
+/opt/trackdirect/jslib/build.sh
 ```
 
 #### Adapt the website (htdocs)
@@ -172,17 +153,11 @@ Webserver should already be up and running (if you installed all specified ubunt
 Add the following to /etc/apache2/sites-enabled/000-default.conf. You need to replace "my_username".
 
 ```html
-<Directory "/home/my_username/trackdirect/htdocs">
+<Directory "/var/www">
     Options SymLinksIfOwnerMatch
     AllowOverride All
     Require all granted
 </Directory>
-```
-
-Change the VirtualHost DocumentRoot: (in /etc/apache2/sites-enabled/000-default.conf):
-
-```htdocs
-DocumentRoot /home/my_username/trackdirect/htdocs
 ```
 
 Enable rewrite and restart apache
@@ -195,8 +170,8 @@ sudo systemctl restart apache2
 For the symbols and heatmap caches to work we need to make sure the webserver has write access (the following permission may be a little bit too generous...)
 
 ```shell
-chmod 777 ~/trackdirect/htdocs/public/symbols
-chmod 777 ~/trackdirect/htdocs/public/heatmaps
+chmod 777 /var/www/trackdirect/htdocs/public/symbols
+chmod 777 /var/www/trackdirect/htdocs/public/heatmaps
 ```
 
 ## Deployment
@@ -205,13 +180,13 @@ chmod 777 ~/trackdirect/htdocs/public/heatmaps
 * Set up firewall and port forwarding
 * Check user names and passwords for the database
 * Check if scripts are running without failure (collectors connecting, websocket server not crashing, etc.)
-* `web_document_root` to be moved to the web server's root, set permissions accordingly
+* Verify that files to be moved have been moved to the correct place and set permissions accordingly
 * `trackdirect_backend.service` systemd service unit files to be copied to `/etc/systemd/system`
   * `sudo systemctl enable trackdirect_backend`
   * `sudo systemctl start trackdirect_backend`
-* Set up cronkjob for cleaning, see below
+* Set up cronjob for cleaning, see below
 
-### Schedule things using cron
+### Cleanup schedule
 
 If you do not have infinite storage we recommend that you delete old packets, schedule the remover.sh script to be executed about once every hour. And again, if you are using OGN as data source you need to run the ogn_devices_install.sh script at least once every hour.
 
@@ -220,10 +195,10 @@ Note that the collector and wsserver shell scripts can be scheduled to start onc
 Crontab example (crontab for the user that owns the "trackdirect" database)
 
 ```cron
-40 * * * * ~/trackdirect/server/scripts/remover.sh trackdirect.ini 2>&1 &
-0 * * * * ~/trackdirect/server/scripts/ogn_devices_install.sh trackdirect 5432 2>&1 &
-* * * * * ~/trackdirect/server/scripts/wsserver.sh trackdirect.ini 2>&1 &
-* * * * * ~/trackdirect/server/scripts/collector.sh trackdirect.ini 0 2>&1 &
+40 * * * * /opt/trackdirect/server/scripts/remover.sh trackdirect.ini 2>&1 &
+0 * * * * /opt/trackdirect/server/scripts/ogn_devices_install.sh trackdirect 5432 2>&1 &
+* * * * * /opt/trackdirect/server/scripts/wsserver.sh trackdirect.ini 2>&1 &
+* * * * * /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 0 2>&1 &
 ```
 
 ### Server Requirements
