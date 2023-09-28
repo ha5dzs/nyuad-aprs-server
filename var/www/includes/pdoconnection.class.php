@@ -9,7 +9,7 @@ class PDOConnection
 
     public function __construct()
     {
-        $this->_config = parse_ini_file(ROOT . '/../config/trackdirect.ini', true);
+        $this->_config = parse_ini_file(ROOT . '/trackdirect.ini', true);
     }
 
     /**

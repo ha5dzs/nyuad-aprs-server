@@ -1756,7 +1756,7 @@ function getSymbolDescription($symbolTable, $symbol, $includeUndefinedOverlay)
  */
 function isAllowedToShowOlderData() {
     $isAllowedToShowOlderData = false;
-    $config = parse_ini_file(ROOT . '/../config/trackdirect.ini', true);
+    $config = parse_ini_file(ROOT . '/trackdirect.ini', true);
 
     if (isset($config['websocket_server'])) {
         if (isset($config['websocket_server']['allow_time_travel'])) {
@@ -1809,7 +1809,7 @@ function getView($request) {
  * @return string
  * */
 function getWebsiteConfig($key) {
-    $config = parse_ini_file(ROOT . '/../config/trackdirect.ini', true);
+    $config = parse_ini_file(ROOT . '/trackdirect.ini', true);
     if (isset($config['website']) && isset($config['website'][$key])) {
         return $config['website'][$key];
     }
