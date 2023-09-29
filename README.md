@@ -181,6 +181,14 @@ sudo a2enmod rewrite
 sudo systemctl restart apache2
 ```
 
+Optionally, you **may** need to enable php, and disable other stuff.
+
+```shell
+sudo a2dismod mpm_event
+sudo a2enmod php8.1
+sudo systemctl restart apache2
+```
+
 For the symbols and heatmap caches to work we need to make sure the webserver has write access (the following permission may be a little bit too generous...)
 
 ```shell
