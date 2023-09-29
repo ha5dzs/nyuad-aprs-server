@@ -205,7 +205,7 @@ sudo ln -s /opt/trackdirect/config/trackdirect.ini /var/www/html/trackdirect.ini
 * `trackdirect_backend.service` systemd service unit files to be copied to `/etc/systemd/system`
   * `sudo systemctl enable trackdirect_backend`
   * `sudo systemctl start trackdirect_backend`
-* Set up cronjob for cleaning, see below
+* Set up cronjob for cleanup
 
 ### Cleanup schedule
 
@@ -217,9 +217,9 @@ Crontab example (crontab for the user that owns the "trackdirect" database)
 
 ```cron
 40 * * * * /opt/trackdirect/server/scripts/remover.sh trackdirect.ini 2>&1 &
-0 * * * * /opt/trackdirect/server/scripts/ogn_devices_install.sh trackdirect 5432 2>&1 &
 * * * * * /opt/trackdirect/server/scripts/wsserver.sh trackdirect.ini 2>&1 &
 * * * * * /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 0 2>&1 &
+* * * * * /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 1 2>&1 &
 ```
 
 ### Server Requirements
