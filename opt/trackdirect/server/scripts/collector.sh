@@ -10,13 +10,16 @@ fi
 CONFIGFILE=$1
 COLLECTORNUMBER=$2
 
+# This variable is used in the Python script being called.
+export INSTALLROOT=/opt/trackdirect
+
+
 if ps -ef | grep -v grep | grep "bin/collector.py $CONFIGFILE $COLLECTORNUMBER" ; then
     exit 0
 else
-    CURRENTDIR=$(dirname $0)
+    # In our system, no other custom libraries are loaded.
+    export PYTHONPATH=$INSTALLROOT/server
 
-    export PYTHONPATH=$PYTHONPATH:$CURRENTDIR/../trackdirect
-    cd $CURRENTDIR/..
-    python $CURRENTDIR/../bin/collector.py $CONFIGFILE $COLLECTORNUMBER
+    python $INSTALLROOT/server/bin/collector.py $CONFIGFILE $COLLECTORNUMBER
     exit 0
 fi

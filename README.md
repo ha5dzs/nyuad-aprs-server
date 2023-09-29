@@ -10,6 +10,12 @@ The core traffic is being accessed by instances of the data **collector** script
 
 Telemetry doesn't seem to work, will need to look into it.
 
+### Environment variables
+
+A lof of stuff seems to be hard-coded. I made the environment variable `INSTALLROOT` and set it to `/opt/trackdirect`. I needed to update all relevant scripts everywhere. I use this to navigate with respect to the installation directory. This way, I no longer need to run it as a standard user.
+
+I overwrite `PYTHONPATH` so I can load the trackdirect module. I do not append to it. Keep this in mind if you are using some custom Python stuff.
+
 #### TCP ports used
 
 * 80 for the website :)
@@ -36,7 +42,7 @@ sudo apt-get install libpq-dev postgresql postgresql-client-common postgresql-cl
 For low-volume applications, OpenStreetMap's tile servers MAY be OK, but you should get alternative solutions. You may want to run your own tile server, or get an API key from a different service. If you make any changes to this, then
 
 ```shell
-sudo -u www-data /opt/trackdirect/jslib/build.sh
+sudo /opt/trackdirect/jslib/build.sh
 ```
 
 ### Connection to the packet network
@@ -70,7 +76,7 @@ sudo -u postgres psql
 ```sql
 CREATE DATABASE trackdirect ENCODING 'UTF8';
 
-CREATE USER database_user WITH PASSWORD database_password;
+CREATE USER database_user WITH PASSWORD 'database_password';
 ALTER ROLE database_user WITH SUPERUSER;
 GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to database_user;
 ```
@@ -81,12 +87,6 @@ GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to database_user;
 * It doesn't store any sensitive information, only sorted packets, which are unencrypted and publicly available anyway
 * Since the database is filled through the python script, the PHP script only makes queries.
 * Old data is getting purged regularly
-
-Save the password to this file as well, some scripts rely on it:
-
-```shell
-echo "foobar" > .pgpass
-```
 
 It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss). For Ubuntu 22.04, posgresql version 14 is bundled, your system might be different.
 
@@ -109,7 +109,7 @@ sudo systemctl restart postgresql
 The script should be executed by the user that owns the database "trackdirect".
 
 ```shell
-/opt/trackdirect/server/scripts/db_setup.sh trackdirect 5432 /opt/trackdirect/misc/database/tables/
+/opt/trackdirect/server/scripts/db_setup.sh trackdirect 5432 /opt/trackdirect/misc/database/tables
 ```
 
 #### Configure trackdirect
@@ -171,7 +171,7 @@ Webserver should already be up and running (if you installed all specified ubunt
 Add the following to /etc/apache2/sites-enabled/000-default.conf. You need to replace "my_username".
 
 ```html
-<Directory "/var/www">
+<Directory "/var/www/html">
     Options SymLinksIfOwnerMatch
     AllowOverride All
     Require all granted
@@ -188,7 +188,7 @@ sudo systemctl restart apache2
 For the symbols and heatmap caches to work we need to make sure the webserver has write access (the following permission may be a little bit too generous...)
 
 ```shell
-chmod 777 /var/www/html//public/symbols
+chmod 777 /var/www/html/public/symbols
 chmod 777 /var/www/html/public/heatmaps
 ```
 

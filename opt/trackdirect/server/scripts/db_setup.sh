@@ -10,8 +10,18 @@ DATABASE=$1
 PORT=$2
 SQLPATH=$3
 
-# Assumes .pgpass is correctly set
-psql -p $PORT $DATABASE << EOF
+# Username and password are hard-coded, but if you change it, here is your chance.
+DB_USER="database_user"
+DB_PASSWORD="database_password"
+
+
+# Instead of using pgpass, new versions of psql support connection strings.
+# This line verifies that I am generating my stuff properly
+
+# echo "psql postgresql://$DB_USER:$DB_PASSWORD@localhost:$PORT/$DATABASE"
+
+# The stuff below this line is being fed to psql
+psql postgresql://$DB_USER:$DB_PASSWORD@localhost:$PORT/$DATABASE << EOF
 
 begin transaction;
 
@@ -39,6 +49,5 @@ begin transaction;
 commit;
 
 EOF
-
 
 exit 0

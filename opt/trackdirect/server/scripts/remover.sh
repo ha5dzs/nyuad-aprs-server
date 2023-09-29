@@ -9,13 +9,15 @@ fi
 
 CONFIGFILE=$1
 
+# This variable is used in the Python script being called.
+export INSTALLROOT=/opt/trackdirect
+
 if ps -ef | grep -v grep | grep "bin/remover.py $CONFIGFILE" ; then
     exit 0
 else
-    CURRENTDIR=$(dirname $0)
+    # In our system, no other custom libraries are loaded.
+    export PYTHONPATH=$INSTALLROOT/server
 
-    export PYTHONPATH=$PYTHONPATH:$CURRENTDIR/../trackdirect
-    cd $CURRENTDIR/..
-    python $CURRENTDIR/../bin/remover.py $CONFIGFILE
+    python $INSTALLROOT/server/bin/remover.py $CONFIGFILE
     exit 0
 fi

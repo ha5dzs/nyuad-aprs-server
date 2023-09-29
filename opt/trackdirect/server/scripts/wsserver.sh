@@ -8,13 +8,16 @@ fi
 
 CONFIGFILE=$1
 
+# This variable is used in the Python script being called.
+export INSTALLROOT=/opt/trackdirect
+
+
 if ps -eo pid,pgid,cmd | grep -v grep | grep "bin/wsserver.py --config $CONFIGFILE" ; then
     exit 0
 else
-    CURRENTDIR=$(dirname $0)
+    # In our system, no other custom libraries are loaded.
+    export PYTHONPATH=$INSTALLROOT/server
 
-    export PYTHONPATH=$PYTHONPATH:$CURRENTDIR/../trackdirect
-    cd $CURRENTDIR/..
-    python $CURRENTDIR/../bin/wsserver.py --config $CONFIGFILE
+    python $INSTALLROOT/server/bin/wsserver.py --config $CONFIGFILE
     exit 0
 fi

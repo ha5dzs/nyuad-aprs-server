@@ -25,7 +25,7 @@ class TrackDirectConfig(Singleton):
             configParser.read(os.path.expanduser(configFile))
         else:
             configParser.read(os.path.expanduser(
-                '~/trackdirect/config/' + configFile))
+                os.environ['INSTALLROOT'] + '/config/' + configFile))
 
         # Database
         self.dbHostname = configParser.get('database', 'host').strip('"')
