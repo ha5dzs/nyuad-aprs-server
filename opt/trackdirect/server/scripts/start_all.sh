@@ -6,6 +6,4 @@ echo "Collector 1:"
 echo "Collector 2:"
 /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 1 &
 echo "Websocket server"
-/opt/trackdirect/server/scripts/wsserver.sh trackdirect.ini &
-
-exit 0
+/opt/trackdirect/server/scripts/wsserver.sh trackdirect.ini

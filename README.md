@@ -210,10 +210,13 @@ sudo ln -s /opt/trackdirect/config/trackdirect.ini /var/www/html/trackdirect.ini
 * Check if `trackdirect.ini` is free from typos
 * Check if scripts are running without failure (collectors connecting, websocket server not crashing, etc.)
 * Verify that files to be moved have been moved to the correct place and set permissions accordingly
-* `trackdirect_backend.service` systemd service unit files to be copied to `/etc/systemd/system`
+* Set up cronjob for cleanup
+
+(optionally)
+* `trackdirect_backend.service` systemd service unit files to be copied to `/etc/systemd/system`. It just executes `/opt/trackdirect/server/scripts/start_all.sh`
   * `sudo systemctl enable trackdirect_backend`
   * `sudo systemctl start trackdirect_backend`
-* Set up cronjob for cleanup
+
 
 ### Cleanup schedule
 
