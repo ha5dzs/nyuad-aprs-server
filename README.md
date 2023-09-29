@@ -18,11 +18,11 @@ I overwrite `PYTHONPATH` so I can load the trackdirect module. I do not append t
 
 #### TCP ports used
 
-* 80 for the website :)
+* 80 for the website
 * 14580 for APRS
 * one for the CWOP server, as configured
-* 5432 for the database access (local to the machine)
-* 9000 for websocket comms (local to the machine, the JavaScript stuff accesses the database real-time this way, if I understand this correctly)
+* 5432 for the database access, local to the machine
+* 9000 for websocket comms (local to the machine, the JavaScript stuff accesses the database real-time this way, if I understand this correctly)
 
 If some IT department is setting up the firewall, tell them that they need to enable the 'unknown application' option, otherwise random packet losses will occur.
 
@@ -47,12 +47,12 @@ sudo /opt/trackdirect/jslib/build.sh
 
 ### Connection to the packet network
 
-As the collector scripts are syphoning out each and every packet ever being trasnmitted, this is going to be a considerable load on someone's server. NYUAD has its own aprs server set up, so we will connect to this one:
+As the collector scripts are syphoning out each and every packet ever being transmitted, this is going to be a considerable load on someone's server. NYUAD has its own aprs server set up, so we will connect to this one:
 
 * APRS: [http://aprs.abudhabi.nyu.edu:14501](http://aprs.abudhabi.nyu.edu:14501)
 * CWOP: [http://aprs.abudhabi.nyu.edu:14502](http://aprs.abudhabi.nyu.edu:14502)
 
-You should connect to these servers from within NYUAD's internal network.
+You should connect to these servers from within NYUAD's internal network. There is enough bandwidth there, hammer away all you like.
 
 ### Installation
 
@@ -66,12 +66,15 @@ pip install -r requirements.txt
 
 #### Database
 
-Set up the database (connect to database using: "sudo -u postgres psql"). If you choose to replace "database_user" and "database_password", then update `trackdirect.ini` as well.
-Note that APRS using UTF-8 encoding so it may be necessary to specify as shown.
+Set up the database (connect to database using: `sudo -u postgres psql`). If you choose to replace "database_user" and "database_password", then update `trackdirect.ini` as well.
+
+**Note** that some server scripts have this username and password saved as well, edit them if you change this
 
 ```shell
 sudo -u postgres psql
 ```
+
+...once you are in, then:
 
 ```sql
 CREATE DATABASE trackdirect ENCODING 'UTF8';
@@ -81,16 +84,16 @@ ALTER ROLE database_user WITH SUPERUSER;
 GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to database_user;
 ```
 
-**A note on security:** Normally, for any exposed environment, publishing any superuser details is something extremely idiotic. But in this case:
+**This is not secure at all!** Normally, for any exposed environment, publishing any superuser details is something extremely idiotic. But in this case:
 
 * The sql system is not used by anything else, and the port is not accessible outside
 * It doesn't store any sensitive information, only sorted packets, which are unencrypted and publicly available anyway
-* Since the database is filled through the python script, the PHP script only makes queries.
+* Since the database is filled through the python script, the PHP script only makes queries, so it would be very difficult to hack into it from outside
 * Old data is getting purged regularly
 
 It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss). For Ubuntu 22.04, posgresql version 14 is bundled, your system might be different.
 
-Some settings in /etc/postgresql/14/main/postgresql.conf that might improve performance:
+Some settings in `/etc/postgresql/14/main/postgresql.conf` that might improve performance:
 
 ```ini
 shared_buffers = 2048MB              # I recommend 25% of total RAM
@@ -106,7 +109,7 @@ sudo systemctl restart postgresql
 
 ##### Set up database tables
 
-The script should be executed by the user that owns the database "trackdirect".
+The script has the database user and password saved, you can execute it as a standard user. It populates the database with the bundled `.sql` files, so other things can interact with them.
 
 ```shell
 /opt/trackdirect/server/scripts/db_setup.sh trackdirect 5432 /opt/trackdirect/misc/database/tables
@@ -114,7 +117,9 @@ The script should be executed by the user that owns the database "trackdirect".
 
 #### Configure trackdirect
 
-Before starting the websocket server you need to update the trackdirect configuration file (trackdirect/config/trackdirect.ini). Read through the configuration file and make any necessary changes.
+Before starting the websocket server you need to update the trackdirect configuration file (`trackdirect/config/trackdirect.ini`).
+
+**PLEASE READ THIS FILE, UNDERSTAND IT, and CHANGE THE STATION CALLSIGNS!**
 
 ```shell
 nano /opt/trackdirect/config/trackdirect.ini
