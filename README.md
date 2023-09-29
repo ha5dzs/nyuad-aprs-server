@@ -160,15 +160,6 @@ If you do changes in the js library (jslib directory) you need to execute build.
 /opt/trackdirect/jslib/build.sh
 ```
 
-#### Adapt the website (htdocs)
-
-For setting up a copy on your local machine for development and testing purposes you do not need to do anything, but for any other pupose I really recommend you to adapt the UI.
-
-First thing to do is probably to select which map provider to use, look for stuff related to map provider in "index.php". Note that the map providers used in the demo website may not be suitable if you plan to have a public website (read their terms of use).
-
-If you make no changes, at least add contact information to yourself, I do not want to receive questions regarding your website.
-
-
 #### Set up webserver
 
 Webserver should already be up and running (if you installed all specified ubuntu packages).
@@ -177,7 +168,7 @@ Add the following to /etc/apache2/sites-enabled/000-default.conf. You need to re
 
 ```html
 <Directory "/var/www/html">
-    Options SymLinksIfOwnerMatch
+    Options FollowSymlinks
     AllowOverride All
     Require all granted
 </Directory>
@@ -202,6 +193,7 @@ chmod 777 /var/www/html/public/heatmaps
 * Set up aprsc to hammer on it locally
 * Set up firewall and port forwarding
 * Check user names and passwords for the database
+* Check if `trackdirect.ini` is free from typos
 * Check if scripts are running without failure (collectors connecting, websocket server not crashing, etc.)
 * Verify that files to be moved have been moved to the correct place and set permissions accordingly
 * `trackdirect_backend.service` systemd service unit files to be copied to `/etc/systemd/system`
