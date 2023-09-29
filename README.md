@@ -164,7 +164,7 @@ If you do changes in the js library (jslib directory) you need to execute build.
 
 Webserver should already be up and running (if you installed all specified ubuntu packages).
 
-Add the following to /etc/apache2/sites-enabled/000-default.conf. You need to replace "my_username".
+Add the following to /etc/apache2/sites-enabled/000-default.conf.
 
 ```html
 <Directory "/var/www/html">
@@ -188,9 +188,15 @@ chmod 777 /var/www/html/public/symbols
 chmod 777 /var/www/html/public/heatmaps
 ```
 
+Create a symlink of the config file in `/var/www/html`, so the php files can read it:
+
+```shell
+sudo ln -s /opt/trackdirect/config/trackdirect.ini /var/www/html/trackdirect.ini
+```
+
 ## Deployment
 
-* Set up aprsc to hammer on it locally
+* Set up aprsc to run locally
 * Set up firewall and port forwarding
 * Check user names and passwords for the database
 * Check if `trackdirect.ini` is free from typos
