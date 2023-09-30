@@ -18,6 +18,10 @@ else
     # In our system, no other custom libraries are loaded.
     export PYTHONPATH=$INSTALLROOT/server
 
+    #Delete the collector logfiles
+    rm -f $INSTALLROOT/server/log/*.log.*
+
     python $INSTALLROOT/server/bin/remover.py $CONFIGFILE
+
     exit 0
 fi

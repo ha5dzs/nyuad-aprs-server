@@ -4,6 +4,7 @@ import logging
 import logging.handlers
 import datetime
 import time
+import os
 import trackdirect
 
 from trackdirect.database.DatabaseConnection import DatabaseConnection
@@ -17,11 +18,11 @@ if __name__ == '__main__':
         sys.exit()
     elif (sys.argv[1].startswith("/")):
         if (not os.path.isfile(sys.argv[1])):
-            print(f"\n File {sys.argv[1]} does not exists")
+            print(f"\n File {sys.argv[1]} does not exist")
             print("\n" + sys.argv[0] + ' [config.ini]')
             sys.exit()
-    elif (not os.path.isfile(os.path.expanduser('~/trackdirect/config/' + sys.argv[1]))):
-        print(f"\n File ~/trackdirect/config/{sys.argv[1]} does not exists")
+    elif (not os.path.isfile(os.path.expanduser(os.environ['INSTALLROOT'] + '/config/' + sys.argv[1]))):
+        print(f"\n File {os.environ['INSTALLROOT']}/config/{sys.argv[1]} does not exist")
         print("\n" + sys.argv[0] + ' [config.ini]')
         sys.exit()
 
@@ -35,7 +36,7 @@ if __name__ == '__main__':
 
     try:
         fh = logging.handlers.RotatingFileHandler(filename=os.path.expanduser(
-            '~/trackdirect/server/log/remover_' + config.dbName + '.log'), mode='a', maxBytes=1000000, backupCount=10)
+            os.environ['INSTALLROOT'] + '/server/log/remover_' + config.dbName + '.log'), mode='a', maxBytes=1000000, backupCount=10)
 
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
