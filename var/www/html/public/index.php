@@ -67,7 +67,7 @@
                 options['useImperialUnit'] = <?php echo (isImperialUnitUser() ? 'true': 'false'); ?>;
                 options['coverageDataUrl'] = '/data/coverage.php';
                 options['coveragePercentile'] = <?php echo (getWebsiteConfig('coverage_percentile') ?? "95"); ?>;
-                options['defaultTimeLength'] = 60; // In minutes
+                options['defaultTimeLength'] = 1440; // In minutes
 
                 var md = new MobileDetect(window.navigator.userAgent);
                 if (md.mobile() !== null) {
