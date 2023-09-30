@@ -1,8 +1,0 @@
-[Unit]
-Description=Trackdirect data collector backend
-
-[Service]
-ExecStart=/opt/trackdirect/server/scripts/start_all.sh
-ExecReload=
-Type=notify
-Restart=always

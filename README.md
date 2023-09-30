@@ -1,18 +1,21 @@
 # NYUAD's APRS server front-end implementation
 
-This is based on TrackDirect, but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network. I am writing this documentation as I am going through the code, so there will undoubtedly be some factual errors. I will correct them as I go.
+This is based on TrackDirect, but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network. I am writing this documentation as I am going through the code, so there will undoubtedly be some factual errors.
+
+## Limitations
+
+* Telemetry `T#XXX,000,000,000,000,000,00000000`-type packets don't get read in. I think this is an `aprslib` issue, [see this link](https://github.com/rossengeorgiev/aprs-python/issues/29).
+* From the CWOP network, only position data is being displayed. Probably this is a collector script issue.
 
 ## How does it work?
 
 Most of the work is done with Python scripts, and are working from the included *trackdirect* **module**.
 
-The core traffic is being accessed by instances of the data **collector** script, and the incoming packets are processed. These scripts upload the processed packets to an sql **database**. The system's web server fetches the required data from the database using **php** scripts, and it gets displayed in the browser using a bunch of javascript libraries.
-
-Telemetry doesn't seem to work, will need to look into it.
+The core traffic is being accessed by instances of the data **collector** script, and the incoming packets are processed. These scripts upload the processed packets to an sql **database**. The system's web server fetches the required data from the database using *websocket*, and it gets displayed in the browser using a bunch of javascript libraries.
 
 ### Environment variables
 
-A lof of stuff seems to be hard-coded. I made the environment variable `INSTALLROOT` and set it to `/opt/trackdirect`. I needed to update all relevant scripts everywhere. I use this to navigate with respect to the installation directory. This way, I no longer need to run it as a standard user.
+A lof of stuff seems to be hard-coded to work from a user's home directory. I made the environment variable `INSTALLROOT` and set it to `/opt/trackdirect`. I needed to update all relevant scripts everywhere. I use this to navigate with respect to the installation directory. This way, I no longer need to run it as a standard user.
 
 I overwrite `PYTHONPATH` so I can load the trackdirect module. I do not append to it. Keep this in mind if you are using some custom Python stuff.
 
@@ -39,7 +42,7 @@ sudo apt-get install libpq-dev postgresql postgresql-client-common postgresql-cl
 
 ### Map tile API key
 
-For low-volume applications, OpenStreetMap's tile servers MAY be OK, but you should get alternative solutions. You may want to run your own tile server, or get an API key from a different service. If you make any changes to this, then
+For low-volume applications, OpenStreetMap's tile servers MAY be OK, but you should get alternative solutions. You may want to run your own tile server, or get an API key from a different service. If you make any changes to the map tile configuration, then:
 
 ```shell
 sudo /opt/trackdirect/jslib/build.sh
@@ -88,7 +91,7 @@ GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to database_user;
 
 * The sql system is not used by anything else, and the port is not accessible outside
 * It doesn't store any sensitive information, only sorted packets, which are unencrypted and publicly available anyway
-* Since the database is filled through the python script, the PHP script only makes queries, so it would be very difficult to hack into it from outside
+* Since the database is filled through the python script, the website only makes queries, so it would be very difficult to hack into it from outside
 * Old data is getting purged regularly
 
 It might be a good idea to play around with some Postgresql settings to improve performance (for this application, speed is more important than minimizing the risk of data loss). For Ubuntu 22.04, posgresql version 14 is bundled, your system might be different.
@@ -117,9 +120,9 @@ The script has the database user and password saved, you can execute it as a sta
 
 #### Configure trackdirect
 
-Before starting the websocket server you need to update the trackdirect configuration file (`trackdirect/config/trackdirect.ini`).
-
 **PLEASE READ THIS FILE, UNDERSTAND IT, and CHANGE THE STATION CALLSIGNS!**
+
+Before starting the websocket server you need to update the trackdirect configuration file (`trackdirect/config/trackdirect.ini`).
 
 ```shell
 nano /opt/trackdirect/config/trackdirect.ini
@@ -149,12 +152,11 @@ Start the websocket server by using the provided shell script, the script should
 /opt/trackdirect/server/scripts/wsserver.sh trackdirect.ini
 ```
 
-
 #### Trackdirect js library
 
 All the map view magic is handled by the trackdirect js library, it contains functionality for rendering the map (using Google Maps API or Leaflet), functionality used to communicate with backend websocket server and much more.
 
-If you do changes in the js library (jslib directory) you need to execute build.sh to deploy the changes to the htdocs directory.
+If you do changes in the js library (jslib directory) you need to execute build.sh to deploy the changes to the web server's document root directory.
 
 ```shell
 /opt/trackdirect/jslib/build.sh
@@ -162,7 +164,7 @@ If you do changes in the js library (jslib directory) you need to execute build.
 
 #### Set up webserver
 
-Webserver should already be up and running (if you installed all specified ubuntu packages).
+The webserver should already be up and running, because you installed all specified ubuntu packages.
 
 Add the following to /etc/apache2/sites-enabled/000-default.conf.
 
@@ -207,24 +209,20 @@ sudo ln -s /opt/trackdirect/config/trackdirect.ini /var/www/html/trackdirect.ini
 * Set up aprsc to run locally
 * Set up firewall and port forwarding
 * Check user names and passwords for the database
-* Check if `trackdirect.ini` is free from typos
+* Check if `trackdirect.ini` is free from typos. You get no warnings, stuff just simply won't run!
 * Check if scripts are running without failure (collectors connecting, websocket server not crashing, etc.)
 * Verify that files to be moved have been moved to the correct place and set permissions accordingly
 * Set up cronjob for cleanup
 
-(optionally)
-* `trackdirect_backend.service` systemd service unit files to be copied to `/etc/systemd/system`. It just executes `/opt/trackdirect/server/scripts/start_all.sh`
-  * `sudo systemctl enable trackdirect_backend`
-  * `sudo systemctl start trackdirect_backend`
-
-
 ### Cleanup schedule
 
-If you do not have infinite storage we recommend that you delete old packets, schedule the remover.sh script to be executed about once every hour. And again, if you are using OGN as data source you need to run the ogn_devices_install.sh script at least once every hour.
+If you do not have infinite storage we recommend that you delete old packets, schedule the remover.sh script to be executed about once every hour.
 
 Note that the collector and wsserver shell scripts can be scheduled to start once every minute (nothing will happen if it is already running). I even recommend doing this as the collector and websocket server are built to shut down if something serious goes wrong (eg lost connection to database).
 
-Crontab example (crontab for the user that owns the "trackdirect" database)
+```shell
+sudo crontab -e
+```
 
 ```cron
 40 * * * * /opt/trackdirect/server/scripts/remover.sh trackdirect.ini 2>&1 &
@@ -232,11 +230,6 @@ Crontab example (crontab for the user that owns the "trackdirect" database)
 * * * * * /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 0 2>&1 &
 * * * * * /opt/trackdirect/server/scripts/collector.sh trackdirect.ini 1 2>&1 &
 ```
-
-### Server Requirements
-
-How powerful server you need depends on what type of data source you are going to use. If you, for example, receive data from the APRS-IS network, you will probably need at least a server with 4 CPUs and 8 GB of RAM, but I recommend using a server with 8 CPUs and 16 GB of RAM.
-
 
 ## Disclaimer
 
