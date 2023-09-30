@@ -5,7 +5,7 @@ This is based on TrackDirect, but I implemented some modifications to fit our re
 ## Limitations
 
 * Telemetry `T#XXX,000,000,000,000,000,00000000`-type packets don't get read in. I think this is an `aprslib` issue, [see this link](https://github.com/rossengeorgiev/aprs-python/issues/29).
-* From the CWOP network, only position data is being displayed. Probably this is a collector script issue.
+* From the CWOP network, only packets with position data added gets displayed. So if your station sends weahter data but not position in the same packet, it won't show.
 
 ## How does it work?
 
