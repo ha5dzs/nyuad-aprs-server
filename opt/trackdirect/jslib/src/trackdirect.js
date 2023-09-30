@@ -991,12 +991,12 @@ var trackdirect = {
 
       defaultMinZoomForMarkerLabel: 11,
       defaultMinZoomForMarkerPrevPosition: 11,
-      defaultMinZoomForMarkerTail: 9,
+      defaultMinZoomForMarkerTail: 8,
       defaultMinZoomForMarkers: 8,
 
       minZoomForMarkerLabel: 11,
       minZoomForMarkerPrevPosition: 11,
-      minZoomForMarkerTail: 9,
+      minZoomForMarkerTail: 8,
       minZoomForMarkers: 8,
 
       markerSymbolBaseDir: "/symbols/",
