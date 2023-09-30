@@ -6,8 +6,9 @@ This is based on TrackDirect, but I implemented some modifications to fit our re
 
 * Telemetry `T#XXX,000,000,000,000,000,00000000`-type packets don't get read in. I think this is an `aprslib` issue, [see this link](https://github.com/rossengeorgiev/aprs-python/issues/29).
 * From the CWOP network, not every gets displayed.
-  * If the station sends weahter data but not position in the same packet, it won't show.
-  * If the station sends packets in rapid succession, it won't show, despite `frequency_limit=0` and `save_fast_packets=1`
+  * If the station sends weather data but not position in the same packet, it won't show.
+  * If the station sends packets in rapid succession, it won't show, despite `frequency_limit=0` and `save_fast_packets=1`.
+  * If the station sends malformed packets (obviously...)
 
 ## How does it work?
 
