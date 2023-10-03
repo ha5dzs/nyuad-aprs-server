@@ -8,8 +8,7 @@ This is based on [trackdirect](https://github.com/qvarforth/trackdirect), but I 
 
 * From the CWOP network, not every packet gets displayed.
   * If the station sends weather data but not position in the same packet, it won't show.
-  * If the station sends packets in rapid succession, it won't always show, despite `frequency_limit=0` and `save_fast_packets=1`.
-  * If the station sends malformed packets (obviously...)
+  * If the station sends packets in rapid succession, it won't always show, despite `frequency_limit=0` and `save_fast_packets=1`. Not sure where these get lost.
 
 ## How does it work?
 
@@ -23,7 +22,7 @@ As of September/October 2023, the APRS and CWOP traffic together generates about
 
 ### Environment variables
 
-A lof of stuff seems to be hard-coded to work from a user's home directory. I made the environment variable `INSTALLROOT` and set it to `/opt/trackdirect`. I needed to update all relevant scripts everywhere. I use this to navigate with respect to the installation directory. This way, I no longer need to run it as a standard user.
+A lof of stuff seems to be hard-coded to work from a user's home directory. I made the environment variable `INSTALLROOT` and set it to `/opt/trackdirect`. Conversely, `WWWROOT` is set to `/var/www/html`. I needed to update all relevant scripts everywhere. The Python scripts, the PHP file and the shell scripts rely on it. I use this to navigate with respect to the installation directory. This way, I no longer need to run it as a standard user.
 
 I overwrite `PYTHONPATH` so I can load the trackdirect module. I do not append to it. Keep this in mind if you are using some custom Python stuff.
 
@@ -58,7 +57,7 @@ sudo /opt/trackdirect/jslib/build.sh
 
 ### Connection to the packet network
 
-As the collector scripts are syphoning out each and every packet ever being transmitted, this is going to be a considerable load on someone's server. NYUAD has its own aprs server set up, so we will connect to this one:
+As the collector scripts are syphoning out each and every packet ever being transmitted sometimes many times over, this is going to be a considerable load on someone's server. NYUAD has its own aprs server set up, so we will connect to this one:
 
 * APRS: [http://aprs.abudhabi.nyu.edu:14501](http://aprs.abudhabi.nyu.edu:14501)
 * CWOP: [http://aprs.abudhabi.nyu.edu:14502](http://aprs.abudhabi.nyu.edu:14502)
@@ -69,7 +68,7 @@ You should connect to these servers from within NYUAD's internal network. There 
 
 After cloning, you'll need to do some manual copying, because nothing is in a package.
 
-But first, install the needed python libraries
+But first, install the needed python libraries:
 
 ```shell
 pip install -r requirements.txt
@@ -78,6 +77,10 @@ pip install -r requirements.txt
 #### Database
 
 Set up the database (connect to database using: `sudo -u postgres psql`). If you choose to replace "database_user" and "database_password", then update `trackdirect.ini` as well.
+
+
+**OPTIONAL:**
+If you need to configure postgres and relocate the data directory somewhere else, edit its config file in `/etc/postgresql/14/main/postgresql.conf`, and at the new path, initialise the directory structure: `sudo -u postgres /usr/lib/postgresql/14/bin/initdb <path_to_wherever_you_want_your_data>`
 
 **Note** that some server scripts have this username and password saved as well, edit them if you change this
 
