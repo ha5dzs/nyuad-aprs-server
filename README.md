@@ -1,20 +1,25 @@
 # NYUAD's APRS server front-end implementation
 
-This is based on TrackDirect, but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network. I am writing this documentation as I am going through the code, so there will undoubtedly be some factual errors.
+This is based on [trackdirect](https://github.com/qvarforth/trackdirect), but I implemented some modifications to fit our requirements. It is listening on the APRS and the CWOP network. I am writing this documentation as I am going through the code, so there will undoubtedly be some factual errors.
 
 ## Limitations
 
 * Telemetry `T#XXX,000,000,000,000,000,00000000`-type packets don't get read in. I think this is an `aprslib` issue, [see this link](https://github.com/rossengeorgiev/aprs-python/issues/29).
-* From the CWOP network, not every gets displayed.
+
+* From the CWOP network, not every packet gets displayed.
   * If the station sends weather data but not position in the same packet, it won't show.
-  * If the station sends packets in rapid succession, it won't show, despite `frequency_limit=0` and `save_fast_packets=1`.
+  * If the station sends packets in rapid succession, it won't always show, despite `frequency_limit=0` and `save_fast_packets=1`.
   * If the station sends malformed packets (obviously...)
 
 ## How does it work?
 
 Most of the work is done with Python scripts, and are working from the included *trackdirect* **module**.
 
-The core traffic is being accessed by instances of the data **collector** script, and the incoming packets are processed. These scripts upload the processed packets to an sql **database**. The system's web server fetches the required data from the database using *websocket*, and it gets displayed in the browser using a bunch of javascript libraries.
+The core traffic is being accessed by instances of the data **collector** script, and the incoming packets are processed and saved into a local database. The system's web server fetches the required data from the database using *websocket*, and it gets displayed in the browser using a bunch of javascript libraries.
+
+For every user's every map view, the server creates `NOCALL` client with a custom set of server-side filters that fits the map view.
+
+As of September/October 2023, the APRS and CWOP traffic together generates about 1 GB of data every hour. There is a scheduled cleaning script that purges old entries.
 
 ### Environment variables
 
