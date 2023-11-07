@@ -32,9 +32,9 @@ I overwrite `PYTHONPATH` so I can load the trackdirect module. I do not append t
 * 14580 for APRS
 * one for the CWOP server, as configured
 * 5432 for the database access, local to the machine
-* 9000 for websocket comms (local to the machine, the JavaScript stuff accesses the database real-time this way, if I understand this correctly)
+* 9000 for websocket comms
 
-If some IT department is setting up the firewall, tell them that they need to enable the 'unknown application' option, otherwise random packet losses will occur.
+If some IT department is setting up the firewall, tell them that they need to enable the 'unknown application' option, otherwise random packet losses will occur. Due to the nature of websocket and more generally packet radio communication, network load balancing may need adjusting.
 
 ### Prerequisites
 
@@ -78,7 +78,6 @@ pip install -r requirements.txt
 
 Set up the database (connect to database using: `sudo -u postgres psql`). If you choose to replace "database_user" and "database_password", then update `trackdirect.ini` as well.
 
-
 **OPTIONAL:**
 If you need to configure postgres and relocate the data directory somewhere else, edit its config file in `/etc/postgresql/14/main/postgresql.conf`, and at the new path, initialise the directory structure: `sudo -u postgres /usr/lib/postgresql/14/bin/initdb <path_to_wherever_you_want_your_data>`
 
@@ -100,7 +99,7 @@ GRANT ALL PRIVILEGES ON DATABASE "trackdirect" to database_user;
 
 **This is not secure at all!** Normally, for any exposed environment, publishing any superuser details is something extremely idiotic. But in this case:
 
-* The sql system is not used by anything else, and the port is not accessible outside
+* The sql system is not used by anything else, and the port is not accessible from outside
 * It doesn't store any sensitive information, only sorted packets, which are unencrypted and publicly available anyway
 * Since the database is filled through the python script, the website only makes queries, so it would be very difficult to hack into it from outside
 * Old data is getting purged regularly
