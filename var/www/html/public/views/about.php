@@ -14,7 +14,7 @@
 	</p>
     </p>
 
-    <img src="/images/aprs-symbols.png" title="APRS symbols" style="width:100%"/>
+    <img src="/images/packet_radio_bing_ai.jpg" title="AI generated image about packet radio" style="width:100%"/>
 
     <h3>Project details</h3>
     <p>

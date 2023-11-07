@@ -9,7 +9,7 @@ class StationRepository extends ModelRepository
     public function __construct()
     {
         parent::__construct('Station');
-        $this->_config = parse_ini_file(ROOT . '/../config/trackdirect.ini', true);
+        $this->_config = parse_ini_file(ROOT . '/trackdirect.ini', true);
     }
 
     /**
