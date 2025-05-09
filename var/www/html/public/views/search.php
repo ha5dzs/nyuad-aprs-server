@@ -1,6 +1,7 @@
 <?php require dirname(__DIR__) . "../../includes/bootstrap.php"; ?>
 
 <?php
+    $use_imperial_units = ($_GET['imperialUnits'] != 0) ? 1 : 0;
     $stations = [];
     $seconds = $_GET['seconds'] ?? 0;
     $page = $_GET['page'] ?? 1;
@@ -71,7 +72,7 @@
                             <img src="<?php echo $foundStation->getIconFilePath(22, 22); ?>" alt="Symbol"/>
                         </td>
                         <td>
-                            <a class="tdlink" href="/views/overview.php?id=<?php echo $foundStation->id; ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>"><?php echo htmlentities($foundStation->name) ?></a>
+                            <a class="tdlink" href="/views/overview.php?id=<?php echo $foundStation->id; ?>&imperialUnits=<?php echo $use_imperial_units ?>"><?php echo htmlentities($foundStation->name) ?></a>
                         </td>
                         <td class="station-latest-heard-timestamp" style="white-space: nowrap;">
                             <?php echo $foundStation->latestConfirmedPacketTimestamp; ?>
@@ -125,7 +126,7 @@
         $('#station-search-form').bind('submit',function(e) {
             var q = $('#station-search-form-q').val();
             var seconds = $('#station-search-form-seconds').val();
-	    loadView('/views/search.php?imperialUnits=<?php echo $_GET['imperialUnits'] ?? '0'; ?>&q=' + q + '&seconds=' + seconds);
+	    loadView('/views/search.php?imperialUnits=<?php echo $use_imperial_units ?>&q=' + q + '&seconds=' + seconds);
             e.preventDefault();
         });
     });
