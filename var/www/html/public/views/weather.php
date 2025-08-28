@@ -1,4 +1,8 @@
-<?php require dirname(__DIR__) . "../../includes/bootstrap.php"; ?>
+<?php require dirname(__DIR__) . "../../includes/bootstrap.php";
+//This is to fix an XSS vulnerability
+$use_imperial_units = ($_GET['imperialUnits'] != 0) ? 1 : 0;
+
+?>
 
 <?php $station = StationRepository::getInstance()->getObjectById($_GET['id'] ?? null); ?>
 <?php if ($station->isExistingObject()) : ?>
@@ -18,12 +22,12 @@
     <title><?php echo $station->name; ?> Weather</title>
     <div class="modal-inner-content">
         <div class="modal-inner-content-menu">
-            <a class="tdlink" title="Overview" href="/views/overview.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Overview</a>
-            <a class="tdlink" title="Statistics" href="/views/statistics.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Statistics</a>
-            <a class="tdlink" title="Trail Chart" href="/views/trail.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Trail Chart</a>
+            <a class="tdlink" title="Overview" href="/views/overview.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Overview</a>
+            <a class="tdlink" title="Statistics" href="/views/statistics.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Statistics</a>
+            <a class="tdlink" title="Trail Chart" href="/views/trail.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Trail Chart</a>
             <span>Weather</span>
-            <a class="tdlink" title="Telemetry" href="/views/telemetry.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Telemetry</a>
-            <a class="tdlink" title="Raw packets" href="/views/raw.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Raw packets</a>
+            <a class="tdlink" title="Telemetry" href="/views/telemetry.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Telemetry</a>
+            <a class="tdlink" title="Raw packets" href="/views/raw.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Raw packets</a>
         </div>
 
         <div class="horizontal-line">&nbsp;</div>

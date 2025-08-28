@@ -13,6 +13,10 @@
         $count = StationRepository::getInstance()->getNumberOfStationsByQueryString($_GET['q'], $seconds);
     }
     $pages = ceil($count / $rows);
+
+    // For fixing XSS stuff, the 'q' variable is truncated to 10 characters.
+   $max_query_string_length = 9; // as we start from 0
+
 ?>
 
 <title>Station search</title>
@@ -31,7 +35,7 @@
             </select>
         </div>
         <div>
-            <input type="text" style="width: 280px; margin-bottom: 5px;" id="station-search-form-q" name="q" placeholder="Search here!" title="Search for a station/vehicle here!" value="<?php echo ($_GET['q'] ?? '') ?>">
+            <input type="text" style="width: 280px; margin-bottom: 5px;" id="station-search-form-q" name="q" placeholder="Search here!" title="Search for a station/vehicle here!" value="<?php echo (substr($_GET['q'], 0, $max_query_string_length) ?? '') ?>">
             <input type="submit" value="Search">
         </div>
     </form>
@@ -45,11 +49,11 @@
 
         <?php if ($pages > 1): ?>
             <div class="pagination">
-              <a class="tdlink" href="/search.php?q=<?php echo ($_GET['q'] ?? "") ?>&seconds=<?php echo $seconds ?>&page=1"><<</a>
+              <a class="tdlink" href="/search.php?q=<?php echo (substr($_GET['q'], 0, $max_query_string_length) ?? "") ?>&seconds=<?php echo $seconds ?>&page=1"><<</a>
               <?php for($i = max(1, $page - 3); $i <= min($pages, $page + 3); $i++) : ?>
-              <a href="/search.php?q=<?php echo ($_GET['q'] ?? "") ?>&seconds=<?php echo $seconds ?>&page=<?php echo $i; ?>" <?php echo ($i == $page ? 'class="tdlink active"': 'class="tdlink"')?>><?php echo $i ?></a>
+              <a href="/search.php?q=<?php echo (substr($_GET['q'], 0, $max_query_string_length) ?? "") ?>&seconds=<?php echo $seconds ?>&page=<?php echo $i; ?>" <?php echo ($i == $page ? 'class="tdlink active"': 'class="tdlink"')?>><?php echo $i ?></a>
               <?php endfor; ?>
-              <a class="tdlink" href="/search.php?q=<?php echo ($_GET['q'] ?? "") ?>&seconds=<?php echo $seconds ?>&page=<?php echo $pages; ?>">>></a>
+              <a class="tdlink" href="/search.php?q=<?php echo (substr($_GET['q'], 0, $max_query_string_length) ?? "") ?>&seconds=<?php echo $seconds ?>&page=<?php echo $pages; ?>">>></a>
             </div>
         <?php endif; ?>
 
@@ -88,7 +92,7 @@
                         </td>
                         <td>
                             <?php if ($foundStation->latestConfirmedPacketTimestamp > (time() - 60*60*24)) : ?>
-                                <a href="?sid=<?php echo $foundStation->id; ?>" onclick="
+                                <a href="?sid=<?php echo intval($foundStation->id); ?>" onclick="
                                     if (window.parent && window.parent.trackdirect) {
                                         $('.modal', parent.document).hide();
                                         window.parent.trackdirect.filterOnStationId([]);

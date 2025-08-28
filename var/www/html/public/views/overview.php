@@ -1,4 +1,7 @@
-<?php require dirname(__DIR__) . "../../includes/bootstrap.php"; ?>
+<?php require dirname(__DIR__) . "../../includes/bootstrap.php";
+// This is to fix an XSS vulnerability
+$use_imperial_units = ($_GET['imperialUnits'] != 0) ? 1 : 0;
+?>
 
 <?php $station = StationRepository::getInstance()->getObjectById($_GET['id'] ?? null); ?>
 <?php if ($station->isExistingObject()) : ?>
@@ -6,11 +9,11 @@
     <div class="modal-inner-content">
         <div class="modal-inner-content-menu">
             <span>Overview</span>
-            <a class="tdlink" title="Statistics" href="/views/statistics.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Statistics</a>
-            <a class="tdlink" title="Trail Chart" href="/views/trail.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Trail Chart</a>
-            <a class="tdlink" title="Weather" href="/views/weather.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Weather</a>
-            <a class="tdlink" title="Telemetry" href="/views/telemetry.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Telemetry</a>
-            <a class="tdlink" title="Raw packets" href="/views/raw.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Raw packets</a>
+            <a class="tdlink" title="Statistics" href="/views/statistics.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Statistics</a>
+            <a class="tdlink" title="Trail Chart" href="/views/trail.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Trail Chart</a>
+            <a class="tdlink" title="Weather" href="/views/weather.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Weather</a>
+            <a class="tdlink" title="Telemetry" href="/views/telemetry.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Telemetry</a>
+            <a class="tdlink" title="Raw packets" href="/views/raw.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Raw packets</a>
         </div>
 
         <div class="horizontal-line">&nbsp;</div>
@@ -117,7 +120,7 @@
                     <div class="overview-content-summary-indent" title="Sender of current packet">
                         <?php $latestPacketSenderStation = StationRepository::getInstance()->getObjectByNameAndSenderId($latestPacketSender->name, $latestPacketSender->id); ?>
                         <?php if ($latestPacketSenderStation->isExistingObject()) : ?>
-                            <a class="tdlink" title="Sender of the object" href="/views/overview.php?id=<?php echo $latestPacketSenderStation->id; ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">
+                            <a class="tdlink" title="Sender of the object" href="/views/overview.php?id=<?php echo $latestPacketSenderStation->id; ?>&imperialUnits=<?php echo $use_imperial_units; ?>">
                                 <?php echo htmlentities($latestPacketSenderStation->name); ?>
                             </a>
                         <?php else : ?>
@@ -420,7 +423,7 @@
                         <?php foreach ($relatedStations as $relatedStation) : ?>
                             <?php if ($relatedStation->id != $station->id) : ?>
                                 <img src="<?php echo $relatedStation->getIconFilePath(22, 22); ?>" alt="Symbol"/>&nbsp;
-                                <span><a class="tdlink" href="/views/overview.php?id=<?php echo $relatedStation->id; ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>"><?php echo htmlentities($relatedStation->name) ?></a></span>
+                                <span><a class="tdlink" href="/views/overview.php?id=<?php echo $relatedStation->id; ?>&imperialUnits=<?php echo $use_imperial_units; ?>"><?php echo htmlentities($relatedStation->name) ?></a></span>
                                 <br/>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -441,7 +444,7 @@
 
                                 <img src="<?php echo $closeByStation->getIconFilePath(22, 22); ?>" alt="Symbol"/>&nbsp;
                                 <span>
-                                    <a class="tdlink" href="/views/overview.php?id=<?php echo $closeByStation->id; ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>"><?php echo htmlentities($closeByStation->name) ?></a>
+                                    <a class="tdlink" href="/views/overview.php?id=<?php echo $closeByStation->id; ?>&imperialUnits=<?php echo $use_imperial_units; ?>"><?php echo htmlentities($closeByStation->name) ?></a>
                                     <span>
                                         <?php if (isImperialUnitUser()) : ?>
                                             <?php if (convertMeterToYard($closeByStation->getDistance($station->latestConfirmedLatitude, $station->latestConfirmedLongitude)) < 1000) : ?>

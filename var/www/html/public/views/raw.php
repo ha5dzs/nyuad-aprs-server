@@ -1,4 +1,8 @@
-<?php require dirname(__DIR__) . "../../includes/bootstrap.php"; ?>
+<?php require dirname(__DIR__) . "../../includes/bootstrap.php";
+// This is to fix an XSS vulnerability
+$use_imperial_units = ($_GET['imperialUnits'] != 0) ? 1 : 0;
+
+?>
 
 <?php $station = StationRepository::getInstance()->getObjectById($_GET['id'] ?? null); ?>
 <?php if ($station->isExistingObject()) : ?>
@@ -22,11 +26,11 @@
     <title><?php echo $station->name; ?> Raw Packets</title>
     <div class="modal-inner-content">
         <div class="modal-inner-content-menu">
-            <a class="tdlink" title="Overview" href="/views/overview.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Overview</a>
-            <a class="tdlink" title="Statistics" href="/views/statistics.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Statistics</a>
-            <a class="tdlink" title="Trail Chart" href="/views/trail.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Trail Chart</a>
-            <a class="tdlink" title="Weather" href="/views/weather.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Weather</a>
-            <a class="tdlink" title="Telemetry" href="/views/telemetry.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $_GET['imperialUnits'] ?? 0; ?>">Telemetry</a>
+            <a class="tdlink" title="Overview" href="/views/overview.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Overview</a>
+            <a class="tdlink" title="Statistics" href="/views/statistics.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Statistics</a>
+            <a class="tdlink" title="Trail Chart" href="/views/trail.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Trail Chart</a>
+            <a class="tdlink" title="Weather" href="/views/weather.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Weather</a>
+            <a class="tdlink" title="Telemetry" href="/views/telemetry.php?id=<?php echo $station->id ?>&imperialUnits=<?php echo $use_imperial_units; ?>">Telemetry</a>
             <span>Raw packets</span>
         </div>
 
@@ -70,11 +74,11 @@
 
         <?php if ($pages > 1): ?>
             <div class="pagination">
-              <a class="tdlink" href="/views/raw.php?id=<?php echo $station->id; ?>&category=<?php echo ($_GET['category'] ?? 1) ?>&type=<?php echo ($_GET['type'] ?? 1); ?>&rows=<?php echo $rows; ?>&page=1"><<</a>
+              <a class="tdlink" href="/views/raw.php?id=<?php echo $station->id; ?>&category=<?php echo (intval($_GET['category']) ?? 1) ?>&type=<?php echo ($_GET['type'] ?? 1); ?>&rows=<?php echo $rows; ?>&page=1"><<</a>
               <?php for($i = max(1, $page - 3); $i <= min($pages, $page + 3); $i++) : ?>
-              <a href="/views/raw.php?id=<?php echo $station->id; ?>&category=<?php echo ($_GET['category'] ?? 1) ?>&type=<?php echo ($_GET['type'] ?? 1); ?>&rows=<?php echo $rows; ?>&page=<?php echo $i; ?>" <?php echo ($i == $page ? 'class="tdlink active"': 'class="tdlink"')?>><?php echo $i ?></a>
+              <a href="/views/raw.php?id=<?php echo $station->id; ?>&category=<?php echo (intval($_GET['category']) ?? 1) ?>&type=<?php echo ($_GET['type'] ?? 1); ?>&rows=<?php echo $rows; ?>&page=<?php echo $i; ?>" <?php echo ($i == $page ? 'class="tdlink active"': 'class="tdlink"')?>><?php echo $i ?></a>
               <?php endfor; ?>
-              <a class="tdlink" href="/views/raw.php?id=<?php echo $station->id; ?>&category=<?php echo ($_GET['category'] ?? 1) ?>&type=<?php echo ($_GET['type'] ?? 1); ?>&rows=<?php echo $rows; ?>&page=<?php echo $pages; ?>">>></a>
+              <a class="tdlink" href="/views/raw.php?id=<?php echo $station->id; ?>&category=<?php echo (intval($_GET['category']) ?? 1) ?>&type=<?php echo ($_GET['type'] ?? 1); ?>&rows=<?php echo $rows; ?>&page=<?php echo $pages; ?>">>></a>
             </div>
         <?php endif; ?>
 

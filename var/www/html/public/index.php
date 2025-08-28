@@ -1,4 +1,53 @@
-<?php require "../includes/bootstrap.php"; ?>
+<?php require "../includes/bootstrap.php";
+
+// Fixing XSS vulnerabilities by sanity checking variables.
+
+// $time is unix time, so it can only be an integer
+$time = $_GET['time']; // Unix timestamp
+	// This is fixed by casting whatever comes in to an integer.
+$time = intval($time);
+
+// $center is a GPS coordonate  float tuple. XX.XXXX,YY.YYYY
+$center = $_GET['center']; // GPS coordinates in ordinary decimal format
+	// This is fixed by limiting this string to maximum 16 characters.
+$center = substr($center, 0, 15);
+// $zoom is for the zoom value of the map API
+$zoom = $_GET['zoom']; // Single-digit number
+	// This is fixed by casing it into an integer
+$zoom = (int)$zoom;
+
+// $timetravel is a Unix timestamp
+$timetravel = $_GET['timetravel']; // Unix timestamp
+	// This is fixed by casting into an integer
+$timetravel = intval($timetravel);
+
+// This implementation is limited to one map view.
+$maptype = $_GET['maptype']; // we use 'roadmap' only
+	// This is fixed by hard-coding.
+$maptype = "roadmap";
+
+// This is not used in this implementation
+$mid = $_GET['mid']; // Google maps specific stuff, we don't use it.
+	// this is fixed by casting into NULL
+$mid = null;
+
+// Station ID is a number. These are sequential numbers, assigned by the server.
+$sid = $_GET['sid']; // Station ID, a 6-digit number.
+	// This is fixed by converting into an integer
+$sid = intval($sid);
+
+// This is a callsign 9 characters max.
+$sname = $_GET['sname']; // Statio name 10 characters max
+	// This is fixed by limiting the string length.
+$name = substr($name, 0, 9);
+
+// These are for search functions, we don't use them here, so all set to null.
+$sidlist = $_GET['sidlist']; // List of Station IDs, colon separated
+$sidlist = null;
+$snamelist = $_GET['snamelist']; // List of station names, colon separated.
+$snamelist = null;
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -74,18 +123,19 @@
                     options['isMobile'] = true;
                 }
 
-                options['time'] =       "<?php echo $_GET['time'] ?? '' ?>";        // How many minutes of history to show
-                options['center'] =     "<?php echo $_GET['center'] ?? '' ?>";      // Position to center on (for example "46.52108,14.63379")
-                options['zoom'] =       "<?php echo $_GET['zoom'] ?? '' ?>";        // Zoom level
-                options['timetravel'] = "<?php echo $_GET['timetravel'] ?? '' ?>";  // Unix timestamp to travel to
-                options['maptype'] =    "<?php echo $_GET['maptype'] ?? '' ?>";     // May be "roadmap", "terrain" or "satellite"
-                options['mid'] =        "<?php echo $_GET['mid'] ?? '' ?>";         // Render map from "Google My Maps" (requires https)
+                //options['time'] =       "<?php echo $_GET['time'] ?? '' ?>";        // How many minutes of history to show
+                options['time'] =       "<?php echo $time ?? '' ?>";	        // How many minutes of history to show
+                options['center'] =     "<?php echo $center ?? '' ?>";      // Position to center on (for example "46.52108,14.63379")
+                options['zoom'] =       "<?php echo $zoom ?? '' ?>";        // Zoom level
+                options['timetravel'] = "<?php echo $timetravel ?? '' ?>";  // Unix timestamp to travel to
+                options['maptype'] =    "<?php echo $maptype ?? '' ?>";     // May be "roadmap", "terrain" or "satellite"
+                options['mid'] =        "<?php echo $mid ?? '' ?>";         // Render map from "Google My Maps" (requires https)
 
                 options['filters'] = {};
-                options['filters']['sid'] = "<?php echo $_GET['sid'] ?? '' ?>";         // Station id to filter on
-                options['filters']['sname'] = "<?php echo $_GET['sname'] ?? '' ?>";     // Station name to filter on
-                options['filters']['sidlist'] = "<?php echo $_GET['sidlist'] ?? '' ?>";     // Station id list to filter on (colon separated)
-                options['filters']['snamelist'] = "<?php echo $_GET['snamelist'] ?? '' ?>"; // Station name list to filter on (colon separated)
+                //options['filters']['sid'] = "<?php echo $_GET['sid'] ?? '' ?>";         // Station id to filter on
+                //options['filters']['sname'] = "<?php echo $_GET['sname'] ?? '' ?>";     // Station name to filter on
+                //options['filters']['sidlist'] = "<?php echo $_GET['sidlist'] ?? '' ?>";     // Station id list to filter on (colon separated)
+                //options['filters']['snamelist'] = "<?php echo $_GET['snamelist'] ?? '' ?>"; // Station name list to filter on (colon separated)
 
                 // Tell jslib which html element to use to show connection status and mouse cordinates
                 options['statusContainerElementId'] = 'status-container';
@@ -193,7 +243,6 @@
                     <a href="javascript:void(0);" id="tdTopnavTimelengthDefault" onclick="trackdirect.setTimeLength(1440); $('#tdTopnavTimelength>a').removeClass('dropdown-content-checkbox-active'); $(this).addClass('dropdown-content-checkbox-active');" class="dropdown-content-checkbox">24 hours</a>
                 </div>
             </div>
-
             <div class="dropdown">
                 <button class="dropbtn">Map API
                     <i class="fa fa-caret-down"></i>
@@ -208,7 +257,6 @@
                     <?php endif; ?>
                 </div>
             </div>
-
             <?php if ($mapapi != 'leaflet-vector') : ?>
             <div class="dropdown">
                 <button class="dropbtn">Map Type
